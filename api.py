@@ -38,12 +38,15 @@ class CreateListDog(Resource):
     args = request_args
 
     def get(self):
+        # Return memcache instead.
         if memcache_client.get(ALL_DOGS):
             return literal_eval(memcache_client.get(ALL_DOGS).decode('utf8')), 200
+        # Get all dogs from database.
         all_dogs = [
             dog.dict_repr()
             for dog in Dogs.query.all()
         ]
+        # Store in memcache
         memcache_client.set(ALL_DOGS, all_dogs, expire=60)
         return all_dogs, 200
 
@@ -81,7 +84,7 @@ class UpdateDog(Resource):
         dog_id = args.get('id')
         dog = Dogs.query.filter_by(id=dog_id).first()
         if not dog:
-            return {'error': 'Dog could not be found.'}, 400
+            return {'error': 'Dog could not be found.'}, 404
         try:
             for key, value in args.items():
                 setattr(dog, key, value)
@@ -102,17 +105,22 @@ class DeleteGetDog(Resource):
     args = request_args
 
     def get(self, dog_id):
+        # Check if memcache have the data.
         if not memcache_client.get(str(dog_id)):
             dog = Dogs.query.filter_by(id=dog_id).first()
             if not dog:
-                return {'error': 'Dog could not be found.'}, 400
+                return {'error': 'Dog could not be found.'}, 404
+            # Set object into memcache.
             memcache_client.set(str(dog_id), dog.dict_repr(), expire=60)
-        return literal_eval(memcache_client.get(str(dog_id)).decode('utf-8')), 200
+
+        # Always return the memcache data.
+        memcache_data = memcache_client.get(str(dog_id))
+        return literal_eval(memcache_data.decode('utf-8')), 200
 
     def delete(self, dog_id):
         dog = Dogs.query.filter_by(id=dog_id).first()
         if not dog:
-            return {'error': 'Dog could not be found.'}, 400
+            return {'error': 'Dog could not be found.'}, 404
         try:
             dog.delete()
             # Delete all_dogs and the single obj from memcache.

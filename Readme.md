@@ -16,6 +16,10 @@ FLASK_ENV="development"
 TESTING_DATABASE_URL="sqlite:///test_furry.sqlite3"
 MEMCACHE_TIMEOUT="60"
 
+Then:
+    >> python3 manage.py db migrate
+    >> python3 manage.py db upgrade
+
 Remember to switch FLASK_ENV to 'testing'.
 
 To run tests:
@@ -27,4 +31,4 @@ Checking codestyle:
     >> flake8
 
 run app with:
-    >> python app.py
+    >> python3 app.py
