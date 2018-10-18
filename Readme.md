@@ -9,10 +9,10 @@ Then:
     >> pip3 install -r requirements.
 
 add .env:
+
 SECRET="a-long-string-of-random-characters-CHANGE-TO-YOUR-LIKING"
 DEV_DATABASE_URL="sqlite:///furry.sqlite3"
 FLASK_ENV="development"
-
 TESTING_DATABASE_URL="sqlite:///test_furry.sqlite3"
 MEMCACHE_TIMEOUT="60"
 
